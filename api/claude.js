@@ -1,5 +1,4 @@
 export default async function handler(req, res) {
-  // Pega a chave que começa por AQ que colaste na Vercel
   const apiKey = process.env.GEMINI_API_KEY;
 
   if (!apiKey) {
@@ -10,35 +9,28 @@ export default async function handler(req, res) {
     const { messages, system } = req.body;
     const userPrompt = messages[messages.length - 1].content;
 
-    // Ajustamos a chamada para aceitar o teu formato de chave
+    // Tentativa de chamada com o formato padrão
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
       method: "POST",
-      headers: { 
-        "Content-Type": "application/json"
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         system_instruction: { parts: [{ text: system }] },
         contents: [{ role: "user", parts: [{ text: userPrompt }] }],
-        generationConfig: { 
-          response_mime_type: "application/json",
-          temperature: 0.7
-        }
+        generationConfig: { response_mime_type: "application/json" }
       })
     });
 
     const data = await response.json();
 
-    if (data.error) {
-      return res.status(500).json({ error: data.error.message });
+    if (!response.ok) {
+      console.error("Erro da Google API:", data);
+      return res.status(response.status).json({ error: data.error?.message || "Erro na API do Google" });
     }
 
     const aiText = data.candidates[0].content.parts[0].text;
-
-    return res.status(200).json({
-      content: [{ text: aiText }]
-    });
+    return res.status(200).json({ content: [{ text: aiText }] });
 
   } catch (error) {
-    return res.status(500).json({ error: "Erro ao processar: " + error.message });
+    return res.status(500).json({ error: "Erro interno: " + error.message });
   }
 }
