@@ -9,21 +9,32 @@ const handler = async (req, res) => {
     const { messages, system } = req.body;
     const userPrompt = messages[messages.length - 1].content;
 
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-pro:generateContent?key=${apiKey}`, {
+    // Usamos o endpoint v1 (estável) que é o que as chaves AQ preferem
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         contents: [{
           role: "user",
-          parts: [{ text: system + "\n\nPergunta do utilizador: " + userPrompt }]
-        }]
+          parts: [{ text: system + "\n\nPergunta: " + userPrompt }]
+        }],
+        generationConfig: {
+          temperature: 0.7,
+          maxOutputTokens: 1000,
+        }
       })
     });
 
     const data = await response.json();
 
-    if (data.error) {
-      return res.status(response.status || 500).json({ error: data.error.message });
+    if (!response.ok) {
+      // Isso vai nos mostrar no log da Vercel o erro exato se falhar
+      console.error("Erro detalhado:", data);
+      return res.status(response.status).json({ error: data.error?.message || "Erro na API" });
+    }
+
+    if (!data.candidates || data.candidates.length === 0) {
+      return res.status(500).json({ error: "O Gemini não devolveu resposta." });
     }
 
     const aiText = data.candidates[0].content.parts[0].text;
@@ -33,7 +44,7 @@ const handler = async (req, res) => {
     });
 
   } catch (error) {
-    return res.status(500).json({ error: "Erro: " + error.message });
+    return res.status(500).json({ error: "Erro interno: " + error.message });
   }
 };
 
