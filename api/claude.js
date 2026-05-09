@@ -1,34 +1,21 @@
-const handler = async (req, res) => {
-  const apiKey = process.env.GEMINI_API_KEY;
-  
+export default async function handler(req, res) {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  if (req.method === 'OPTIONS') return res.status(200).end();
+  if (req.method !== 'POST') return res.status(405).end();
+  if (!process.env.ANTHROPIC_API_KEY) return res.status(500).json({ error: 'ANTHROPIC_API_KEY nao configurada.' });
   try {
-    const { messages } = req.body;
-    const prompt = messages[messages.length - 1].content;
-
-    // Usando o modelo 'gemini-pro' (versão 1.0) que é o mais compatível
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${apiKey}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }]
-      })
+    const r = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': process.env.ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01'
+      },
+      body: JSON.stringify(req.body)
     });
-
-    const data = await response.json();
-
-    if (data.error) {
-      return res.status(response.status).json({ 
-        error: `Google diz: ${data.error.message} (Código: ${data.error.code})` 
-      });
-    }
-
-    const aiText = data.candidates[0].content.parts[0].text;
-    return res.status(200).json({ content: [{ text: aiText }] });
-
-  } catch (e) {
-    return res.status(500).json({ error: "Erro: " + e.message });
-  }
-};
-
-module.exports = handler;
-module.exports = handler;
+    const data = await r.json();
+    return res.status(r.status).json(data);
+  } catch(e) { return res.status(500).json({ error: e.message }); }
+}
