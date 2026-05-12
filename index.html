@@ -88,7 +88,48 @@ body{height:100%;height:-webkit-fill-available;overflow:hidden;background:var(--
 #app{height:100vh;height:100dvh;display:none;grid-template-columns:360px 1fr}
 #app.on{display:grid}
 @media(max-width:700px){
-  #app.on{grid-template-columns:1fr;grid-template-rows:1fr auto}
+  #app.on{
+    grid-template-columns:1fr;
+    grid-template-rows:1fr;
+    position:relative;
+  }
+  .sb{
+    position:absolute;inset:0;
+    z-index:2;
+    transition:transform .3s cubic-bezier(.4,0,.2,1);
+  }
+  .sb.hide-mobile{
+    transform:translateX(-100%);
+    pointer-events:none;
+  }
+  .main{
+    position:absolute;inset:0;
+    z-index:1;
+  }
+  /* Tab bar */
+  .mob-tabs{
+    display:flex;
+    position:absolute;bottom:0;left:0;right:0;
+    z-index:20;
+    background:var(--bg2);
+    border-top:1px solid var(--border2);
+    padding-bottom:env(safe-area-inset-bottom);
+  }
+  .mob-tab{
+    flex:1;padding:12px 8px 10px;
+    display:flex;flex-direction:column;align-items:center;gap:3px;
+    font-size:10px;color:var(--hint);cursor:pointer;
+    transition:color .18s;border:none;background:none;
+    font-family:'Inter',sans-serif;
+  }
+  .mob-tab.active{color:var(--accent)}
+  .mob-tab svg{width:20px;height:20px}
+  /* shift content up to make room for tabs */
+  .sb-foot{padding-bottom:calc(60px + env(safe-area-inset-bottom)) !important}
+  #res{padding-bottom:80px}
+}
+@media(min-width:701px){
+  .mob-tabs{display:none}
 }
 
 /* ── SIDEBAR ── */
@@ -192,8 +233,7 @@ body{height:100%;height:-webkit-fill-available;overflow:hidden;background:var(--
 .main::-webkit-scrollbar{width:4px}
 .main::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:2px}
 @media(max-width:700px){
-  .main{display:none}
-  .main.has-results{display:flex}
+  .main{display:flex;min-height:0}
 }
 
 /* empty state */
@@ -367,6 +407,22 @@ body{height:100%;height:-webkit-fill-available;overflow:hidden;background:var(--
     </div>
     <div id="res"></div>
   </main>
+  <!-- MOBILE TAB BAR -->
+  <div class="mob-tabs" id="mobTabs" style="display:none">
+    <button class="mob-tab active" id="tabChat" onclick="switchTab('chat')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+      </svg>
+      Chat
+    </button>
+    <button class="mob-tab" id="tabResults" onclick="switchTab('results')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+        <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
+      </svg>
+      Propostas
+    </button>
+  </div>
 </div>
 
 <script>
@@ -971,6 +1027,11 @@ function renderResults(filters, suggestions, tip) {
   document.querySelector(".main").classList.add("has-results");
   const res = document.getElementById("res");
   res.style.display = "block";
+  // On mobile, switch to results tab automatically after first results
+  if (isMobile()) {
+    showMobileTabs();
+    setTimeout(() => switchTab('results'), 300);
+  }
   res.innerHTML = `
     <div class="sv-hero">
       <div style="font-size:20px">🔍</div>
@@ -1014,6 +1075,33 @@ async function process(txt) {
   }
 }
 
+// ── MOBILE TABS ──
+function isMobile() { return window.innerWidth <= 700; }
+
+function switchTab(tab) {
+  const sb = document.querySelector('.sb');
+  const main = document.querySelector('.main');
+  const tabChat = document.getElementById('tabChat');
+  const tabResults = document.getElementById('tabResults');
+  if (tab === 'chat') {
+    sb.classList.remove('hide-mobile');
+    tabChat.classList.add('active');
+    tabResults.classList.remove('active');
+  } else {
+    sb.classList.add('hide-mobile');
+    tabResults.classList.add('active');
+    tabChat.classList.remove('active');
+    // Scroll results to top
+    main.scrollTop = 0;
+  }
+}
+
+function showMobileTabs() {
+  if (isMobile()) {
+    document.getElementById('mobTabs').style.display = 'flex';
+  }
+}
+
 function boot() {
   const v = document.getElementById("LI").value.trim();
   if (!v) return;
@@ -1021,6 +1109,7 @@ function boot() {
   setTimeout(() => {
     document.getElementById("land").style.display = "none";
     document.getElementById("app").classList.add("on");
+    showMobileTabs();
     addMsg("u", v);
     showTyping();
     process(v);
@@ -1033,6 +1122,8 @@ async function send() {
   const t = el.value.trim();
   if (!t) return;
   el.value = ""; el.style.height = "auto";
+  // On mobile switch to chat to show the reply coming in
+  if (isMobile()) switchTab('chat');
   addMsg("u", t);
   showTyping();
   await process(t);
@@ -1046,6 +1137,8 @@ function doReset() {
   document.getElementById("empty").style.display = "flex";
   document.querySelector(".main").classList.remove("has-results");
   document.getElementById("sbFilters").classList.remove("has");
+  document.getElementById("mobTabs").style.display = "none";
+  if (isMobile()) { document.querySelector('.sb').classList.remove('hide-mobile'); }
   document.getElementById("app").classList.remove("on");
   document.getElementById("land").style.display = "flex";
   document.getElementById("LI").value = "";
