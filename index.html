@@ -2,7 +2,7 @@
 <html lang="pt">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>AutoMatch — Encontra o teu carro</title>
 <meta name="description" content="Descreve o carro que procuras e recebe as melhores propostas dos maiores sites de Portugal.">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@400;500&display=swap" rel="stylesheet">
@@ -19,14 +19,15 @@
   --amber:#fbbf24;
   --r:12px;--r2:18px;
 }
-html,body{height:100%;overflow:hidden}
-body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:14px;line-height:1.6}
+html{height:100%;height:-webkit-fill-available}
+body{height:100%;height:-webkit-fill-available;overflow:hidden;background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:14px;line-height:1.6}
 
 /* ── LANDING ── */
 #land{
   position:fixed;inset:0;display:flex;flex-direction:column;
   align-items:center;justify-content:center;padding:32px 20px;
   background:var(--bg);z-index:100;
+  overflow-y:auto;-webkit-overflow-scrolling:touch;
   transition:opacity .5s cubic-bezier(.4,0,.2,1),transform .5s cubic-bezier(.4,0,.2,1);
 }
 #land.away{opacity:0;transform:scale(.97);pointer-events:none}
@@ -84,13 +85,22 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
 .land-trust span{display:flex;align-items:center;gap:5px}
 
 /* ── APP ── */
-#app{height:100vh;display:none;grid-template-columns:360px 1fr}
+#app{height:100vh;height:100dvh;display:none;grid-template-columns:360px 1fr}
 #app.on{display:grid}
+@media(max-width:700px){
+  #app.on{grid-template-columns:1fr;grid-template-rows:1fr auto}
+}
 
 /* ── SIDEBAR ── */
 .sb{
   background:var(--bg2);border-right:1px solid var(--border);
-  display:flex;flex-direction:column;height:100vh;overflow:hidden;
+  display:flex;flex-direction:column;
+  height:100vh;height:100dvh;
+  overflow:hidden;
+  position:relative;
+}
+@media(max-width:700px){
+  .sb{height:auto;min-height:0;flex:1}
 }
 .sb-top{
   padding:16px 18px;border-bottom:1px solid var(--border);
@@ -116,7 +126,7 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
 .ft.i{background:var(--green-dim);color:var(--green);border:1px solid var(--green-border)}
 .ft.x{background:var(--red-dim);color:var(--red);border:1px solid var(--red-border)}
 
-.msgs{flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:12px}
+.msgs{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:18px;display:flex;flex-direction:column;gap:12px;min-height:0}
 .msgs::-webkit-scrollbar{width:3px}
 .msgs::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
 
@@ -142,7 +152,16 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
 .typing span:nth-child(3){animation-delay:.3s}
 @keyframes bop{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-4px)}}
 
-.sb-foot{padding:12px 14px;border-top:1px solid var(--border);flex-shrink:0}
+.sb-foot{
+  padding:12px 14px;
+  padding-bottom:max(12px, env(safe-area-inset-bottom));
+  border-top:1px solid var(--border);
+  flex-shrink:0;
+  position:sticky;
+  bottom:0;
+  background:var(--bg2);
+  z-index:10;
+}
 .cin-wrap{
   display:flex;gap:6px;background:var(--bg3);
   border:1px solid var(--border2);border-radius:10px;
@@ -169,9 +188,13 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
 .cin-hint{font-size:11px;color:var(--hint);margin-top:6px;text-align:center}
 
 /* ── MAIN ── */
-.main{overflow-y:auto;background:var(--bg);display:flex;flex-direction:column}
+.main{overflow-y:auto;-webkit-overflow-scrolling:touch;background:var(--bg);display:flex;flex-direction:column}
 .main::-webkit-scrollbar{width:4px}
 .main::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:2px}
+@media(max-width:700px){
+  .main{display:none}
+  .main.has-results{display:flex}
+}
 
 /* empty state */
 .empty{
@@ -945,6 +968,7 @@ function renderResults(filters, suggestions, tip) {
     <span style="font-weight:600">Dica: </span>${tip}</div>` : "";
 
   document.getElementById("empty").style.display = "none";
+  document.querySelector(".main").classList.add("has-results");
   const res = document.getElementById("res");
   res.style.display = "block";
   res.innerHTML = `
@@ -1020,6 +1044,7 @@ function doReset() {
   document.getElementById("res").style.display = "none";
   document.getElementById("res").innerHTML = "";
   document.getElementById("empty").style.display = "flex";
+  document.querySelector(".main").classList.remove("has-results");
   document.getElementById("sbFilters").classList.remove("has");
   document.getElementById("app").classList.remove("on");
   document.getElementById("land").style.display = "flex";
@@ -1034,9 +1059,16 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("LI").addEventListener("keydown", e => { if (e.key === "Enter") boot(); });
 
   const cin = document.getElementById("cin");
-  cin.addEventListener("input", () => { cin.style.height = "auto"; cin.style.height = cin.scrollHeight + "px"; });
+  cin.addEventListener("input", () => { cin.style.height = "auto"; cin.style.height = Math.min(cin.scrollHeight, 120) + "px"; });
   cin.addEventListener("keydown", e => {
     if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
+  });
+  // iPhone: scroll input into view when keyboard appears
+  cin.addEventListener("focus", () => {
+    setTimeout(() => {
+      cin.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      document.querySelector(".sb-foot").scrollIntoView({ behavior: "smooth", block: "end" });
+    }, 350);
   });
 });
 </script>
