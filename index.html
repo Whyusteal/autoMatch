@@ -87,50 +87,7 @@ body{height:100%;height:-webkit-fill-available;overflow:hidden;background:var(--
 /* ── APP ── */
 #app{height:100vh;height:100dvh;display:none;grid-template-columns:360px 1fr}
 #app.on{display:grid}
-@media(max-width:700px){
-  #app.on{
-    grid-template-columns:1fr;
-    grid-template-rows:1fr;
-    position:relative;
-  }
-  .sb{
-    position:absolute;inset:0;
-    z-index:2;
-    transition:transform .3s cubic-bezier(.4,0,.2,1);
-  }
-  .sb.hide-mobile{
-    transform:translateX(-100%);
-    pointer-events:none;
-  }
-  .main{
-    position:absolute;inset:0;
-    z-index:1;
-  }
-  /* Tab bar */
-  .mob-tabs{
-    display:flex;
-    position:absolute;bottom:0;left:0;right:0;
-    z-index:20;
-    background:var(--bg2);
-    border-top:1px solid var(--border2);
-    padding-bottom:env(safe-area-inset-bottom);
-  }
-  .mob-tab{
-    flex:1;padding:12px 8px 10px;
-    display:flex;flex-direction:column;align-items:center;gap:3px;
-    font-size:10px;color:var(--hint);cursor:pointer;
-    transition:color .18s;border:none;background:none;
-    font-family:'Inter',sans-serif;
-  }
-  .mob-tab.active{color:var(--accent)}
-  .mob-tab svg{width:20px;height:20px}
-  /* shift content up to make room for tabs */
-  .sb-foot{padding-bottom:calc(60px + env(safe-area-inset-bottom)) !important}
-  #res{padding-bottom:80px}
-}
-@media(min-width:701px){
-  .mob-tabs{display:none}
-}
+
 
 /* ── SIDEBAR ── */
 .sb{
@@ -140,9 +97,7 @@ body{height:100%;height:-webkit-fill-available;overflow:hidden;background:var(--
   overflow:hidden;
   position:relative;
 }
-@media(max-width:700px){
-  .sb{height:auto;min-height:0;flex:1}
-}
+
 .sb-top{
   padding:16px 18px;border-bottom:1px solid var(--border);
   display:flex;align-items:center;gap:10px;flex-shrink:0;
@@ -232,9 +187,7 @@ body{height:100%;height:-webkit-fill-available;overflow:hidden;background:var(--
 .main{overflow-y:auto;-webkit-overflow-scrolling:touch;background:var(--bg);display:flex;flex-direction:column}
 .main::-webkit-scrollbar{width:4px}
 .main::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:2px}
-@media(max-width:700px){
-  .main{display:flex;min-height:0}
-}
+
 
 /* empty state */
 .empty{
@@ -340,6 +293,105 @@ body{height:100%;height:-webkit-fill-available;overflow:hidden;background:var(--
 .fb-h{background:var(--green-dim);color:var(--green);border:1px solid var(--green-border)}
 .fb-e{background:var(--accent-dim);color:var(--accent);border:1px solid var(--accent-border)}
 .fb-g{background:rgba(251,191,36,.09);color:var(--amber);border:1px solid rgba(251,191,36,.22)}
+
+/* ═══════════════════════════════
+   MOBILE — clean slide approach
+   ═══════════════════════════════ */
+@media (max-width: 700px) {
+
+  /* App is a single full-screen container */
+  #app.on {
+    display: block;
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+  }
+
+  /* Both panels sit side by side inside a slider */
+  .mob-slider {
+    display: flex;
+    width: 200%;
+    height: 100%;
+    transition: transform .35s cubic-bezier(.4,0,.2,1);
+  }
+  .mob-slider.show-results {
+    transform: translateX(-50%);
+  }
+
+  .sb {
+    width: 50%;
+    height: 100%;
+    flex-shrink: 0;
+    border-right: none;
+  }
+
+  .main {
+    width: 50%;
+    height: 100%;
+    flex-shrink: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Floating button to see results — appears after first search */
+  #mob-see-results {
+    display: none;
+    position: fixed;
+    bottom: calc(80px + env(safe-area-inset-bottom));
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 50;
+    background: var(--accent);
+    color: #09090b;
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 12px 24px;
+    border-radius: 999px;
+    border: none;
+    cursor: pointer;
+    white-space: nowrap;
+    box-shadow: 0 4px 24px rgba(184,255,74,.35);
+    animation: popIn .3s cubic-bezier(.34,1.56,.64,1);
+  }
+  #mob-see-results.visible { display: block; }
+  @keyframes popIn {
+    from { opacity:0; transform: translateX(-50%) scale(.8); }
+    to   { opacity:1; transform: translateX(-50%) scale(1); }
+  }
+
+  /* Back button inside results on mobile */
+  #mob-back {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 20px 0;
+    font-size: 13px;
+    color: var(--sub);
+    cursor: pointer;
+    background: none;
+    border: none;
+    font-family: 'Inter', sans-serif;
+    margin-bottom: -8px;
+  }
+
+  /* Adjust footer padding for safe area */
+  .sb-foot {
+    padding-bottom: max(14px, env(safe-area-inset-bottom)) !important;
+  }
+
+  /* Results padding at bottom */
+  #res { padding-bottom: 40px; }
+  .empty { padding-bottom: 40px; }
+}
+
+@media (min-width: 701px) {
+  .mob-slider { display: contents; }
+  #mob-see-results { display: none !important; }
+  #mob-back { display: none !important; }
+}
 </style>
 </head>
 <body>
@@ -371,6 +423,7 @@ body{height:100%;height:-webkit-fill-available;overflow:hidden;background:var(--
 <!-- APP -->
 <div id="app">
 
+  <div class="mob-slider" id="mobSlider">
   <!-- SIDEBAR -->
   <aside class="sb">
     <div class="sb-top">
@@ -405,8 +458,14 @@ body{height:100%;height:-webkit-fill-available;overflow:hidden;background:var(--
       <h3>À espera da tua pesquisa</h3>
       <p>Usa o chat ao lado — quanto mais detalhes deres, mais certeiras serão as propostas.</p>
     </div>
+    <button id="mob-back" onclick="mobGoChat()">← Voltar ao chat</button>
     <div id="res"></div>
   </main>
+  </div><!-- /mob-slider -->
+
+  <!-- MOBILE: floating CTA button -->
+  <button id="mob-see-results" onclick="mobGoResults()">Ver propostas →</button>
+
   <!-- MOBILE TAB BAR -->
   <div class="mob-tabs" id="mobTabs" style="display:none">
     <button class="mob-tab active" id="tabChat" onclick="switchTab('chat')">
@@ -462,203 +521,226 @@ function svURL(f) {
 }
 
 // ── STANDVIRTUAL URL BUILDER ──
-// Padrão confirmado: standvirtual.com/carros/[marca]/[modelo]/usados?[filtros]
-// Exemplos reais: /carros/toyota/rav4, /carros/peugeot/5008, /carros/seat/alhambra
+// Estrutura confirmada: standvirtual.com/carros/[make]/[model]?[filtros]
+// Parâmetros confirmados das URLs reais do Standvirtual
 
 const SV_MAKE_SLUGS = {
-  // Marcas — slug exacto do Standvirtual
   "toyota":"toyota","honda":"honda","mazda":"mazda","mitsubishi":"mitsubishi",
   "nissan":"nissan","suzuki":"suzuki","lexus":"lexus","subaru":"subaru",
-  "volkswagen":"volkswagen","vw":"volkswagen","passat":"volkswagen",
-  "bmw":"bmw","mercedes":"mercedes-benz","mercedes-benz":"mercedes-benz",
+  "volkswagen":"volkswagen","vw":"volkswagen",
+  "bmw":"bmw",
+  "mercedes":"mercedes-benz","mercedes-benz":"mercedes-benz",
   "audi":"audi","opel":"opel","porsche":"porsche","seat":"seat","skoda":"skoda",
-  "ford":"ford","renault":"renault","peugeot":"peugeot","citroen":"citroen",
-  "citroën":"citroen","fiat":"fiat","alfa":"alfa-romeo","alfa-romeo":"alfa-romeo",
+  "ford":"ford","renault":"renault","peugeot":"peugeot",
+  "citroen":"citroen","citroën":"citroen",
+  "fiat":"fiat","alfa":"alfa-romeo","alfa-romeo":"alfa-romeo",
   "kia":"kia","hyundai":"hyundai","dacia":"dacia","volvo":"volvo",
   "land-rover":"land-rover","landrover":"land-rover","range-rover":"land-rover",
   "jeep":"jeep","mini":"mini","smart":"smart","tesla":"tesla","cupra":"cupra",
-  "ds":"ds-automobiles","jaguar":"jaguar","maserati":"maserati",
-  "chevrolet":"chevrolet","dodge":"dodge","chrysler":"chrysler",
-  "ssangyong":"ssangyong","mg":"mg","byd":"byd","lynk":"lynk-co"
+  "ds":"ds-automobiles","jaguar":"jaguar","mg":"mg","byd":"byd",
+  "chevrolet":"chevrolet","ssangyong":"ssangyong","suzuki":"suzuki",
+  "maserati":"maserati","ferrari":"ferrari","lamborghini":"lamborghini",
 };
 
 const SV_MODEL_SLUGS = {
   // Toyota
-  "yaris":"yaris","corolla":"corolla","camry":"camry","rav4":"rav4","rav-4":"rav4",
-  "c-hr":"c-hr","chr":"c-hr","highlander":"highlander","hilux":"hilux",
-  "land cruiser":"land-cruiser","landcruiser":"land-cruiser","prius":"prius",
-  "verso":"verso","aygo":"aygo","proace":"proace","proace verso":"proace-verso",
+  "yaris":"yaris","corolla":"corolla","camry":"camry",
+  "rav4":"rav4","rav-4":"rav4",
+  "c-hr":"c-hr","chr":"c-hr",
+  "highlander":"highlander","hilux":"hilux",
+  "land cruiser":"land-cruiser","landcruiser":"land-cruiser",
+  "prius":"prius","verso":"verso","aygo":"aygo",
+  "proace verso":"proace-verso","proace":"proace",
   "gr yaris":"gr-yaris","supra":"supra","bz4x":"bz4x",
   // Honda
-  "civic":"civic","accord":"accord","hr-v":"hr-v","hrv":"hr-v","cr-v":"cr-v","crv":"cr-v",
-  "jazz":"jazz","e":"e","pilot":"pilot","ridgeline":"ridgeline","odyssey":"odyssey",
+  "civic":"civic","accord":"accord",
+  "hr-v":"hr-v","hrv":"hr-v",
+  "cr-v":"cr-v","crv":"cr-v",
+  "jazz":"jazz",
   // Volkswagen
-  "golf":"golf","polo":"polo","passat":"passat","tiguan":"tiguan","touareg":"touareg",
-  "t-roc":"t-roc","troc":"t-roc","t-cross":"t-cross","tcross":"t-cross",
+  "golf":"golf","polo":"polo","passat":"passat","tiguan":"tiguan",
+  "touareg":"touareg","t-roc":"t-roc","troc":"t-roc",
+  "t-cross":"t-cross","tcross":"t-cross",
   "arteon":"arteon","sharan":"sharan","touran":"touran","caddy":"caddy",
-  "multivan":"multivan","id.3":"id.3","id.4":"id.4","id.5":"id.5","id3":"id.3","id4":"id.4",
+  "multivan":"multivan",
+  "id.3":"id.3","id.4":"id.4","id.5":"id.5",
+  "id3":"id.3","id4":"id.4","id5":"id.5",
   // BMW
-  "serie 1":"serie-1","serie 2":"serie-2","serie 3":"serie-3","serie 4":"serie-4",
-  "serie 5":"serie-5","serie 6":"serie-6","serie 7":"serie-7","serie 8":"serie-8",
-  "320":"serie-3","330":"serie-3","318":"serie-3","316":"serie-3",
-  "520":"serie-5","530":"serie-5","118":"serie-1","120":"serie-1",
+  "serie 1":"serie-1","serie 2":"serie-2","serie 3":"serie-3",
+  "serie 4":"serie-4","serie 5":"serie-5","serie 7":"serie-7",
   "x1":"x1","x2":"x2","x3":"x3","x4":"x4","x5":"x5","x6":"x6","x7":"x7",
-  "i3":"i3","i4":"i4","i5":"i5","i7":"i7","ix":"ix","m3":"m3","m5":"m5",
-  "2 gran tourer":"serie-2","218":"serie-2","220":"serie-2",
-  // Mercedes
+  "i3":"i3","i4":"i4","i5":"i5","i7":"i7","ix":"ix",
+  "m3":"m3","m4":"m4","m5":"m5",
+  "2 gran tourer":"serie-2","gran tourer":"serie-2",
+  // Mercedes-Benz
   "classe a":"classe-a","classe b":"classe-b","classe c":"classe-c",
   "classe e":"classe-e","classe s":"classe-s","classe g":"classe-g",
   "gla":"gla","glb":"glb","glc":"glc","gle":"gle","gls":"gls",
-  "cla":"cla","cls":"cls","eqa":"eqa","eqb":"eqb","eqc":"eqc","eqs":"eqs",
-  "a180":"classe-a","a200":"classe-a","c200":"classe-c","c220":"classe-c",
-  "e220":"classe-e","e200":"classe-e","sprinter":"sprinter","vito":"vito",
+  "cla":"cla","cls":"cls",
+  "eqa":"eqa","eqb":"eqb","eqc":"eqc","eqs":"eqs",
+  "sprinter":"sprinter","vito":"vito",
   // Audi
   "a1":"a1","a2":"a2","a3":"a3","a4":"a4","a5":"a5","a6":"a6","a7":"a7","a8":"a8",
-  "q2":"q2","q3":"q3","q4":"q4","q5":"q5","q6":"q6","q7":"q7","q8":"q8",
+  "q2":"q2","q3":"q3","q4":"q4","q5":"q5","q7":"q7","q8":"q8",
   "tt":"tt","r8":"r8","e-tron":"e-tron","etron":"e-tron",
   // Renault
   "clio":"clio","megane":"megane","captur":"captur","kadjar":"kadjar",
   "scenic":"scenic","grand scenic":"grand-scenic","grandscenic":"grand-scenic",
   "koleos":"koleos","talisman":"talisman","twingo":"twingo","zoe":"zoe",
-  "arkana":"arkana","austral":"austral","rafale":"rafale","espace":"espace",
+  "arkana":"arkana","austral":"austral","espace":"espace",
   // Peugeot
   "108":"108","208":"208","308":"308","408":"408","508":"508",
-  "2008":"2008","3008":"3008","4008":"4008","5008":"5008","e-5008":"e-5008",
-  "partner":"partner","expert":"expert","rifter":"rifter",
+  "2008":"2008","3008":"3008","5008":"5008","e-5008":"e-5008",
+  "partner":"partner","rifter":"rifter",
   // Citroën
-  "c1":"c1","c2":"c2","c3":"c3","c4":"c4","c5":"c5","c6":"c6",
+  "c1":"c1","c2":"c2","c3":"c3","c4":"c4","c5":"c5",
   "c3 aircross":"c3-aircross","c5 aircross":"c5-aircross",
-  "berlingo":"berlingo","jumpy":"jumpy","spacetourer":"spacetourer",
-  // SEAT
-  "ibiza":"ibiza","leon":"leon","arona":"arona","ateca":"ateca","tarraco":"tarraco",
-  "alhambra":"alhambra","toledo":"toledo","mii":"mii","exeo":"exeo",
+  "berlingo":"berlingo","spacetourer":"spacetourer",
+  // SEAT / Cupra
+  "ibiza":"ibiza","leon":"leon","arona":"arona","ateca":"ateca",
+  "tarraco":"tarraco","alhambra":"alhambra","toledo":"toledo",
+  "formentor":"formentor","born":"born","terramar":"terramar",
   // Skoda
   "fabia":"fabia","octavia":"octavia","superb":"superb","kodiaq":"kodiaq",
-  "karoq":"karoq","scala":"scala","kamiq":"kamiq","enyaq":"enyaq","citigo":"citigo",
+  "karoq":"karoq","scala":"scala","kamiq":"kamiq","enyaq":"enyaq",
   // Kia
   "picanto":"picanto","rio":"rio","ceed":"ceed","xceed":"xceed",
-  "stinger":"stinger","sportage":"sportage","sorento":"sorento",
-  "carnival":"carnival","niro":"niro","ev6":"ev6","ev9":"ev9",
-  "soul":"soul","stonic":"stonic","telluride":"telluride",
+  "sportage":"sportage","sorento":"sorento","carnival":"carnival",
+  "niro":"niro","ev6":"ev6","ev9":"ev9","soul":"soul","stonic":"stonic",
+  "stinger":"stinger",
   // Hyundai
   "i10":"i10","i20":"i20","i30":"i30","i40":"i40",
   "tucson":"tucson","santa fe":"santa-fe","santafe":"santa-fe",
   "kona":"kona","ioniq":"ioniq","ioniq 5":"ioniq-5","ioniq 6":"ioniq-6",
-  "nexo":"nexo","ix35":"ix35","ix20":"ix20",
+  "ix35":"ix35","nexo":"nexo",
   // Opel
   "corsa":"corsa","astra":"astra","insignia":"insignia","mokka":"mokka",
   "crossland":"crossland","grandland":"grandland","zafira":"zafira",
-  "agila":"agila","meriva":"meriva","ampera":"ampera","vectra":"vectra",
+  "meriva":"meriva","vectra":"vectra","agila":"agila",
   // Fiat
   "500":"500","500x":"500x","500l":"500l","500e":"500e",
-  "panda":"panda","tipo":"tipo","bravo":"bravo","doblo":"doblo",
-  "ducato":"ducato","punto":"punto","stilo":"stilo",
+  "panda":"panda","tipo":"tipo","bravo":"bravo","doblo":"doblo","punto":"punto",
   // Dacia
   "sandero":"sandero","logan":"logan","duster":"duster",
-  "lodgy":"lodgy","dokker":"dokker","spring":"spring","jogger":"jogger",
+  "lodgy":"lodgy","spring":"spring","jogger":"jogger",
   // Volvo
-  "s40":"s40","s60":"s60","s80":"s80","s90":"s90",
+  "s40":"s40","s60":"s60","s90":"s90",
   "v40":"v40","v60":"v60","v70":"v70","v90":"v90",
   "xc40":"xc40","xc60":"xc60","xc70":"xc70","xc90":"xc90","c40":"c40",
   // Ford
   "fiesta":"fiesta","focus":"focus","mondeo":"mondeo","mustang":"mustang",
   "puma":"puma","kuga":"kuga","edge":"edge","explorer":"explorer",
-  "galaxy":"galaxy","s-max":"s-max","smax":"s-max","transit":"transit",
-  "ranger":"ranger","ecosport":"ecosport","tourneo":"tourneo",
+  "galaxy":"galaxy","s-max":"s-max","smax":"s-max",
+  "transit":"transit","ranger":"ranger","ecosport":"ecosport",
   // Nissan
-  "micra":"micra","juke":"juke","qashqai":"qashqai","x-trail":"x-trail",
-  "xtrail":"x-trail","leaf":"leaf","ariya":"ariya","navara":"navara",
-  "pathfinder":"pathfinder","370z":"370z","gt-r":"gt-r",
+  "micra":"micra","juke":"juke","qashqai":"qashqai",
+  "x-trail":"x-trail","xtrail":"x-trail",
+  "leaf":"leaf","ariya":"ariya","navara":"navara","370z":"370z",
   // Mazda
   "mazda2":"mazda2","mazda3":"mazda3","mazda6":"mazda6",
-  "cx-3":"cx-3","cx-5":"cx-5","cx-30":"cx-30","cx-60":"cx-60","cx-90":"cx-90",
+  "cx-3":"cx-3","cx-5":"cx-5","cx-30":"cx-30","cx-60":"cx-60",
   "mx-5":"mx-5","mx5":"mx-5",
-  // Mitsubishi
-  "colt":"colt","lancer":"lancer","outlander":"outlander","eclipse cross":"eclipse-cross",
-  "l200":"l200","pajero":"pajero","asx":"asx","space star":"space-star",
-  // Land Rover
+  // Land Rover / Jeep
   "discovery":"discovery","defender":"defender","freelander":"freelander",
   "range rover":"range-rover","range rover sport":"range-rover-sport",
-  "range rover evoque":"range-rover-evoque","range rover velar":"range-rover-velar",
-  // Jeep
-  "renegade":"renegade","compass":"compass","cherokee":"cherokee",
-  "grand cherokee":"grand-cherokee","wrangler":"wrangler","avenger":"avenger",
-  // Mini
-  "mini cooper":"cooper","mini one":"one","mini clubman":"clubman",
-  "mini countryman":"countryman","mini paceman":"paceman","mini cabrio":"cabrio",
+  "range rover evoque":"range-rover-evoque",
+  "renegade":"renegade","compass":"compass","wrangler":"wrangler",
+  "cherokee":"cherokee","grand cherokee":"grand-cherokee","avenger":"avenger",
+  // Mini / Tesla / Alfa
   "cooper":"cooper","clubman":"clubman","countryman":"countryman",
-  // Tesla
   "model 3":"model-3","model y":"model-y","model s":"model-s","model x":"model-x",
-  // Alfa Romeo
   "giulia":"giulia","stelvio":"stelvio","tonale":"tonale","giulietta":"giulietta",
-  "147":"147","156":"156","159":"159","mito":"mito","brera":"brera",
-  // Cupra
-  "formentor":"formentor","leon":"leon","born":"born","ateca":"ateca","terramar":"terramar"
+  "147":"147","156":"156","159":"159","mito":"mito",
+  // Mitsubishi
+  "outlander":"outlander","eclipse cross":"eclipse-cross",
+  "l200":"l200","pajero":"pajero","asx":"asx","colt":"colt",
+};
+
+// Valores CONFIRMADOS dos filtros de combustível do Standvirtual
+// Fonte: URLs reais observadas no site
+const SV_FUEL_MAP = {
+  "Diesel":       "diesel",
+  "Gasolina":     "petrol",
+  "Híbrido":      "hibride-gaz",       // Híbrido (Gasolina) — o mais comum
+  "Híbrido Plug-in": "plug-in_hybrid",
+  "Elétrico":     "electric",
 };
 
 function buildSVUrl(name, filters) {
-  // Normaliza o nome do carro
-  const lower = (name || "").toLowerCase()
-    .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
-    .replace(/[^a-z0-9\s-]/g," ").trim().replace(/\s+/g," ");
+  // Normaliza o nome
+  const lower = (name || "")
+    .toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9\s-]/g, " ")
+    .trim().replace(/\s+/g, " ");
 
   const words = lower.split(" ");
-  const makeWord = words[0];
-  const makeSlug = SV_MAKE_SLUGS[makeWord] || makeWord;
 
-  // Tenta encontrar o modelo — procura combinações de 1, 2 e 3 palavras
+  // Encontra make slug
+  const makeSlug = SV_MAKE_SLUGS[words[0]] || words[0];
+
+  // Encontra model slug — tenta 3, 2 e 1 palavras
   let modelSlug = null;
   for (let len = 3; len >= 1; len--) {
-    const candidate = words.slice(1, 1+len).join(" ");
-    if (SV_MODEL_SLUGS[candidate]) {
-      modelSlug = SV_MODEL_SLUGS[candidate];
-      break;
-    }
-    // Também tenta com hífen
-    const hyphenated = words.slice(1, 1+len).join("-");
-    if (SV_MODEL_SLUGS[hyphenated]) {
-      modelSlug = SV_MODEL_SLUGS[hyphenated];
-      break;
-    }
+    const candidate = words.slice(1, 1 + len).join(" ");
+    if (SV_MODEL_SLUGS[candidate]) { modelSlug = SV_MODEL_SLUGS[candidate]; break; }
+    const hyphen = words.slice(1, 1 + len).join("-");
+    if (SV_MODEL_SLUGS[hyphen]) { modelSlug = SV_MODEL_SLUGS[hyphen]; break; }
   }
 
-  // Constrói os query params com os filtros do utilizador
-  const p = new URLSearchParams();
-  const fuelMap = {
-    "Diesel":"diesel","Gasolina":"petrol","Híbrido":"hybrid",
-    "Híbrido Plug-in":"plug-in_hybrid","Elétrico":"electric"
-  };
+  // Base URL: /carros/[make]/[model] ou /carros/[make]
+  let base;
+  if (makeSlug && modelSlug) {
+    base = `https://www.standvirtual.com/carros/${makeSlug}/${modelSlug}`;
+  } else if (makeSlug) {
+    base = `https://www.standvirtual.com/carros/${makeSlug}`;
+  } else {
+    base = "https://www.standvirtual.com/carros/usados";
+  }
+
+  // Query params com os nomes CORRECTOS do Standvirtual
+  const params = [];
+
+  // Combustível: search[filter_enum_fuel_type][N]=VALUE
   if (filters?.fuel?.length) {
-    let i = 0;
-    filters.fuel.forEach(fu => {
-      p.append(`fuel_type[${i}]`, fuelMap[fu] || fu.toLowerCase());
-      i++;
+    filters.fuel.forEach((fu, i) => {
+      const val = SV_FUEL_MAP[fu];
+      if (val) params.push(`search[filter_enum_fuel_type][${i}]=${encodeURIComponent(val)}`);
     });
   }
-  if (filters?.maxKm)    p.set("mileage[to]", filters.maxKm);
-  if (filters?.maxPrice) p.set("price[to]", filters.maxPrice);
-  if (filters?.minYear)  p.set("first_registration_year[from]", filters.minYear);
-  if (filters?.minSeats) p.set("nr_seats[from]", filters.minSeats);
-  p.set("search[order]", "created_at:desc");
 
-  const queryStr = p.toString() ? "?" + p.toString() : "";
+  // Quilómetros máximos: search[filter_float_mileage:to]=VALUE
+  if (filters?.maxKm) {
+    params.push(`search[filter_float_mileage:to]=${filters.maxKm}`);
+  }
 
-  // URL directa marca/modelo/usados — o formato mais preciso do Standvirtual
-  if (makeSlug && modelSlug) {
-    return `https://www.standvirtual.com/carros/${makeSlug}/${modelSlug}/usados${queryStr}`;
+  // Preço máximo: search[filter_float_price:to]=VALUE
+  if (filters?.maxPrice) {
+    params.push(`search[filter_float_price:to]=${filters.maxPrice}`);
   }
-  // Fallback: só marca
-  if (makeSlug) {
-    return `https://www.standvirtual.com/carros/${makeSlug}/usados${queryStr}`;
+
+  // Ano mínimo: search[filter_float_first_registration_year:from]=VALUE
+  if (filters?.minYear) {
+    params.push(`search[filter_float_first_registration_year:from]=${filters.minYear}`);
   }
-  // Último fallback: pesquisa geral com texto
-  p.set("search[filter_str]", name);
-  return `https://www.standvirtual.com/carros/usados/pesquisar?${p.toString()}`;
+
+  // Lugares mínimos: search[filter_float_nr_seats:from]=VALUE
+  if (filters?.minSeats) {
+    params.push(`search[filter_float_nr_seats:from]=${filters.minSeats}`);
+  }
+
+  // Ordenar por mais recentes
+  params.push("search[order]=created_at%3Adesc");
+
+  const query = params.length ? "?" + params.join("&") : "";
+  return base + query;
 }
 
-// Mantém compatibilidade com chamadas antigas
+
+// Compatibilidade
 function svSearchURL(term, f) { return buildSVUrl(term, f); }
-function svDirectURL(name, f) { return buildSVUrl(name, f); }
+function svDirectURL(name, f)  { return buildSVUrl(name, f); }
+function svURL(f) { return buildSVUrl("", f); } // URL geral sem marca/modelo
 
 function asURL(f) {
   const p = new URLSearchParams();
@@ -697,129 +779,118 @@ function scoreClass(score) {
 
 // Mapa de imagens por modelo — URLs públicas do Wikimedia Commons
 const CAR_IMAGES = {
-  // Toyota
-  "toyota yaris": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/2020_Toyota_Yaris_Icon_1.5_Front.jpg/320px-2020_Toyota_Yaris_Icon_1.5_Front.jpg",
-  "toyota corolla": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/forty/2019_Toyota_Corolla_sedan_%28facelift%2C_white%29%2C_front_8.15.19.jpg/320px-2019_Toyota_Corolla_sedan_%28facelift%2C_white%29%2C_front_8.15.19.jpg",
-  "toyota rav4": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/2019_Toyota_RAV4_XLE_AWD_%28facelift%2C_red%29%2C_front_8.15.19.jpg/320px-2019_Toyota_RAV4_XLE_AWD_%28facelift%2C_red%29%2C_front_8.15.19.jpg",
-  "toyota c-hr": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/2020_Toyota_C-HR_Dynamic_1.8_Front.jpg/320px-2020_Toyota_C-HR_Dynamic_1.8_Front.jpg",
-  "toyota prius": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/thirty/2019_Toyota_Prius_plug-in_hybrid_%28facelift%2C_blue%29%2C_front_8.15.19.jpg/320px-2019_Toyota_Prius_plug-in_hybrid_%28facelift%2C_blue%29%2C_front_8.15.19.jpg",
-  "toyota hilux": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/2016_Toyota_Hilux_Invincible_X_2.8_Front.jpg/320px-2016_Toyota_Hilux_Invincible_X_2.8_Front.jpg",
-  "toyota proace verso": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Toyota_Proace_Verso_IMG_4820.jpg/320px-Toyota_Proace_Verso_IMG_4820.jpg",
-  "toyota verso": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Toyota_Verso_facelift.jpg/320px-Toyota_Verso_facelift.jpg",
-  "toyota aygo": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/2018_Toyota_Aygo_x-play_1.0.jpg/320px-2018_Toyota_Aygo_x-play_1.0.jpg",
-  "toyota land cruiser": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/2022_Toyota_Land_Cruiser_300_%28facelift%29%2C_front_8.22.21.jpg/320px-2022_Toyota_Land_Cruiser_300_%28facelift%29%2C_front_8.22.21.jpg",
-  // Volkswagen
-  "volkswagen golf": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/VW_Golf_VIII_2pa_amf.jpg/320px-VW_Golf_VIII_2pa_amf.jpg",
-  "volkswagen polo": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/2018_Volkswagen_Polo_Beats_1.0_Front.jpg/320px-2018_Volkswagen_Polo_Beats_1.0_Front.jpg",
+  "toyota yaris":      "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/2020_Toyota_Yaris_GR_Sport_1.5_VVT-i_%28facelift%2C_white%29%2C_front_8.15.19.jpg/320px-2020_Toyota_Yaris_GR_Sport_1.5_VVT-i_%28facelift%2C_white%29%2C_front_8.15.19.jpg",
+  "toyota corolla":    "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/2019_Toyota_Corolla_sedan_%28facelift%2C_white%29%2C_front_8.15.19.jpg/320px-2019_Toyota_Corolla_sedan_%28facelift%2C_white%29%2C_front_8.15.19.jpg",
+  "toyota rav4":       "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/2019_Toyota_RAV4_XLE_AWD_%28facelift%2C_red%29%2C_front_8.15.19.jpg/320px-2019_Toyota_RAV4_XLE_AWD_%28facelift%2C_red%29%2C_front_8.15.19.jpg",
+  "toyota c-hr":       "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/2020_Toyota_C-HR_GR_Sport_1.8_VVT-i_Hybrid_%28facelift%29_Front.jpg/320px-2020_Toyota_C-HR_GR_Sport_1.8_VVT-i_Hybrid_%28facelift%29_Front.jpg",
+  "toyota prius":      "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/2019_Toyota_Prius_Excel_%28facelift%2C_white%29%2C_front_8.15.19.jpg/320px-2019_Toyota_Prius_Excel_%28facelift%2C_white%29%2C_front_8.15.19.jpg",
+  "toyota hilux":      "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/2016_Toyota_Hilux_Invincible_X_2.8_Front.jpg/320px-2016_Toyota_Hilux_Invincible_X_2.8_Front.jpg",
+  "toyota proace verso":"https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Toyota_Proace_Verso_IMG_4820.jpg/320px-Toyota_Proace_Verso_IMG_4820.jpg",
+  "toyota verso":      "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Toyota_Verso_facelift.jpg/320px-Toyota_Verso_facelift.jpg",
+  "toyota aygo":       "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/2018_Toyota_Aygo_x-play_1.0.jpg/320px-2018_Toyota_Aygo_x-play_1.0.jpg",
+  "volkswagen golf":   "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/VW_Golf_VIII_2pa_amf.jpg/320px-VW_Golf_VIII_2pa_amf.jpg",
+  "volkswagen polo":   "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/2018_Volkswagen_Polo_Beats_1.0_Front.jpg/320px-2018_Volkswagen_Polo_Beats_1.0_Front.jpg",
   "volkswagen tiguan": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/2021_Volkswagen_Tiguan_Life_TDI_150_Front.jpg/320px-2021_Volkswagen_Tiguan_Life_TDI_150_Front.jpg",
-  "volkswagen touran": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/VW_Touran_II_–_Frontansicht%2C_26._April_2015%2C_Düsseldorf.jpg/320px-VW_Touran_II_–_Frontansicht%2C_26._April_2015%2C_Düsseldorf.jpg",
+  "volkswagen touran": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/VW_Touran_II_%E2%80%93_Frontansicht%2C_26._April_2015%2C_D%C3%BCsseldorf.jpg/320px-VW_Touran_II_%E2%80%93_Frontansicht%2C_26._April_2015%2C_D%C3%BCsseldorf.jpg",
   "volkswagen passat": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/2019_Volkswagen_Passat_SE_Nav_TDI_front.jpg/320px-2019_Volkswagen_Passat_SE_Nav_TDI_front.jpg",
-  "volkswagen sharan": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/thirty/VW_Sharan_II_–_Frontansicht%2C_11._März_2012.jpg/320px-VW_Sharan_II_–_Frontansicht%2C_11._März_2012.jpg",
-  "volkswagen t-roc": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/2018_VW_T-Roc_1.5_TSI_ACT_150_PS_Automatik_Havannabraun_Metallic_%28cropped%29.jpg/320px-2018_VW_T-Roc_1.5_TSI_ACT_150_PS_Automatik_Havannabraun_Metallic_%28cropped%29.jpg",
-  // BMW
-  "bmw x3": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/2022_BMW_X3_xDrive30e_%28G01%2C_facelift%29%2C_front_8.22.21.jpg/320px-2022_BMW_X3_xDrive30e_%28G01%2C_facelift%29%2C_front_8.22.21.jpg",
-  "bmw x5": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/2019_BMW_X5_xDrive40i_%28G05%29%2C_front_8.15.19.jpg/320px-2019_BMW_X5_xDrive40i_%28G05%29%2C_front_8.15.19.jpg",
-  "bmw x1": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/99/2023_BMW_X1_xDrive23i_%28U11%29%2C_front_9.18.22.jpg/320px-2023_BMW_X1_xDrive23i_%28U11%29%2C_front_9.18.22.jpg",
-  "bmw serie 3": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/2019_BMW_330i_%28G20%29_Sport_Line%2C_front_8.15.19.jpg/320px-2019_BMW_330i_%28G20%29_Sport_Line%2C_front_8.15.19.jpg",
-  "bmw serie 5": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/2021_BMW_530e_M_Sport_%28G30%2C_facelift%29%2C_front_8.22.21.jpg/320px-2021_BMW_530e_M_Sport_%28G30%2C_facelift%29%2C_front_8.22.21.jpg",
-  "bmw serie 1": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/2019_BMW_118i_M_Sport_%28F40%29%2C_front_8.15.19.jpg/320px-2019_BMW_118i_M_Sport_%28F40%29%2C_front_8.15.19.jpg",
-  // Mercedes
-  "mercedes-benz classe c": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d1/2022_Mercedes-Benz_C-Class_AMG_Line_%28W206%29%2C_front_8.22.21.jpg/320px-2022_Mercedes-Benz_C-Class_AMG_Line_%28W206%29%2C_front_8.22.21.jpg",
-  "mercedes-benz glc": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/72/2023_Mercedes-Benz_GLC_300_%28X254%29%2C_front_9.18.22.jpg/320px-2023_Mercedes-Benz_GLC_300_%28X254%29%2C_front_9.18.22.jpg",
-  "mercedes-benz classe a": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/2019_Mercedes-Benz_A200_AMG_Line_%28W177%29%2C_front_8.15.19.jpg/320px-2019_Mercedes-Benz_A200_AMG_Line_%28W177%29%2C_front_8.15.19.jpg",
-  "mercedes-benz gla": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/33/2021_Mercedes-Benz_GLA_250_%28H247%29%2C_front_8.22.21.jpg/320px-2021_Mercedes-Benz_GLA_250_%28H247%29%2C_front_8.22.21.jpg",
-  // Renault
-  "renault clio": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/97/2019_Renault_Clio_Intens_TCe_100_%28facelift%29_Front.jpg/320px-2019_Renault_Clio_Intens_TCe_100_%28facelift%29_Front.jpg",
-  "renault megane": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/Renault_Megane_IV_%28facelift%2C_2020%29_IMG_3441.jpg/320px-Renault_Megane_IV_%28facelift%2C_2020%29_IMG_3441.jpg",
-  "renault captur": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/thirty/2020_Renault_Captur_Iconic_TCe_130_%28facelift%29_Front.jpg/320px-2020_Renault_Captur_Iconic_TCe_130_%28facelift%29_Front.jpg",
-  "renault scenic": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/94/Renault_Scenic_IV_%282016-2019%29.jpg/320px-Renault_Scenic_IV_%282016-2019%29.jpg",
-  "renault grand scenic": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/94/Renault_Scenic_IV_%282016-2019%29.jpg/320px-Renault_Scenic_IV_%282016-2019%29.jpg",
-  "renault kadjar": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/2019_Renault_Kadjar_Iconic_dCi_115_Front.jpg/320px-2019_Renault_Kadjar_Iconic_dCi_115_Front.jpg",
-  "renault zoe": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/thirty/2020_Renault_Zoe_GT_Line_Front.jpg/320px-2020_Renault_Zoe_GT_Line_Front.jpg",
-  // Peugeot
-  "peugeot 208": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/thirty/2020_Peugeot_208_Allure_PureTech_100_Front.jpg/320px-2020_Peugeot_208_Allure_PureTech_100_Front.jpg",
-  "peugeot 308": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/2022_Peugeot_308_Allure_PureTech_130_Front.jpg/320px-2022_Peugeot_308_Allure_PureTech_130_Front.jpg",
-  "peugeot 3008": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Peugeot_3008_II_%28facelift%2C_2020%29_IMG_2927.jpg/320px-Peugeot_3008_II_%28facelift%2C_2020%29_IMG_2927.jpg",
-  "peugeot 5008": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Peugeot_5008_II_%28facelift%2C_2020%29_IMG_3571.jpg/320px-Peugeot_5008_II_%28facelift%2C_2020%29_IMG_3571.jpg",
-  "peugeot 2008": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/2020_Peugeot_2008_Allure_PureTech_130_Front.jpg/320px-2020_Peugeot_2008_Allure_PureTech_130_Front.jpg",
-  // Kia
-  "kia sportage": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/2022_Kia_Sportage_GT-Line_%28NQ5%29%2C_front_8.22.21.jpg/320px-2022_Kia_Sportage_GT-Line_%28NQ5%29%2C_front_8.22.21.jpg",
-  "kia sorento": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b3/2021_Kia_Sorento_GT-Line_%28MQ4%29%2C_front_8.22.21.jpg/320px-2021_Kia_Sorento_GT-Line_%28MQ4%29%2C_front_8.22.21.jpg",
-  "kia carnival": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/2022_Kia_Carnival_EX_%28KA4%29%2C_front_8.22.21.jpg/320px-2022_Kia_Carnival_EX_%28KA4%29%2C_front_8.22.21.jpg",
-  "kia niro": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/2023_Kia_Niro_HEV_GT-Line_%28SG2%29%2C_front_9.18.22.jpg/320px-2023_Kia_Niro_HEV_GT-Line_%28SG2%29%2C_front_9.18.22.jpg",
-  "kia ceed": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Kia_Ceed_III_IMG_6618.jpg/320px-Kia_Ceed_III_IMG_6618.jpg",
-  "kia stinger": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9d/2018_Kia_Stinger_GT_S_%28facelift%29_front_9.18.22.jpg/320px-2018_Kia_Stinger_GT_S_%28facelift%29_front_9.18.22.jpg",
-  "kia ev6": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/2022_Kia_EV6_GT-Line_%28CV%29%2C_front_8.22.21.jpg/320px-2022_Kia_EV6_GT-Line_%28CV%29%2C_front_8.22.21.jpg",
-  // Hyundai
-  "hyundai tucson": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/2021_Hyundai_Tucson_Premium_MHEV_1.6_Front.jpg/320px-2021_Hyundai_Tucson_Premium_MHEV_1.6_Front.jpg",
-  "hyundai santa fe": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8b/2021_Hyundai_Santa_Fe_Premium_SE_CRDi_%28facelift%29_Front.jpg/320px-2021_Hyundai_Santa_Fe_Premium_SE_CRDi_%28facelift%29_Front.jpg",
-  "hyundai kona": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9d/2021_Hyundai_Kona_Premium_1.0T_Front.jpg/320px-2021_Hyundai_Kona_Premium_1.0T_Front.jpg",
-  "hyundai ioniq 5": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1d/2022_Hyundai_IONIQ_5_%28NE%29%2C_front_8.22.21.jpg/320px-2022_Hyundai_IONIQ_5_%28NE%29%2C_front_8.22.21.jpg",
-  "hyundai i30": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Hyundai_i30_III_%28facelift%2C_2020%29_IMG_1476.jpg/320px-Hyundai_i30_III_%28facelift%2C_2020%29_IMG_1476.jpg",
-  // Seat / Skoda / Cupra
-  "seat leon": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d2/2020_Seat_Leon_FR_1.5_Front.jpg/320px-2020_Seat_Leon_FR_1.5_Front.jpg",
-  "seat ibiza": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/2021_Seat_Ibiza_FR_1.0_TSI_Front.jpg/320px-2021_Seat_Ibiza_FR_1.0_TSI_Front.jpg",
-  "seat ateca": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/06/2021_Seat_Ateca_FR_2.0_TDI_Front.jpg/320px-2021_Seat_Ateca_FR_2.0_TDI_Front.jpg",
-  "seat tarraco": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/2019_Seat_Tarraco_FR_2.0_TDI_Front.jpg/320px-2019_Seat_Tarraco_FR_2.0_TDI_Front.jpg",
-  "seat alhambra": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/SEAT_Alhambra_II_%28facelift%2C_2015%29_IMG_0612.jpg/320px-SEAT_Alhambra_II_%28facelift%2C_2015%29_IMG_0612.jpg",
-  "skoda octavia": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f1/2021_%C5%A0koda_Octavia_Style_TDI_Front.jpg/320px-2021_%C5%A0koda_Octavia_Style_TDI_Front.jpg",
-  "skoda kodiaq": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/2022_%C5%A0koda_Kodiaq_Style_TDI_Front.jpg/320px-2022_%C5%A0koda_Kodiaq_Style_TDI_Front.jpg",
-  "skoda superb": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c4/2020_%C5%A0koda_Superb_SE_L_%28facelift%29_Front.jpg/320px-2020_%C5%A0koda_Superb_SE_L_%28facelift%29_Front.jpg",
-  "cupra formentor": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/2021_Cupra_Formentor_VZ2_2.0_Front.jpg/320px-2021_Cupra_Formentor_VZ2_2.0_Front.jpg",
-  // Dacia
-  "dacia duster": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/2022_Dacia_Duster_Extreme_TCe_150_Front.jpg/320px-2022_Dacia_Duster_Extreme_TCe_150_Front.jpg",
-  "dacia sandero": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a6/2021_Dacia_Sandero_Stepway_Comfort_TCe_90_Front.jpg/320px-2021_Dacia_Sandero_Stepway_Comfort_TCe_90_Front.jpg",
-  "dacia lodgy": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/thirty/Dacia_Lodgy_IMG_0016.jpg/320px-Dacia_Lodgy_IMG_0016.jpg",
-  "dacia jogger": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8b/2022_Dacia_Jogger_Extreme_TCe_110_Front.jpg/320px-2022_Dacia_Jogger_Extreme_TCe_110_Front.jpg",
-  // Volvo
-  "volvo xc90": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/24/2020_Volvo_XC90_Recharge_T8_Inscription_%28facelift%29_Front.jpg/320px-2020_Volvo_XC90_Recharge_T8_Inscription_%28facelift%29_Front.jpg",
-  "volvo xc60": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/2022_Volvo_XC60_B5_Inscription_%28facelift%29_Front.jpg/320px-2022_Volvo_XC60_B5_Inscription_%28facelift%29_Front.jpg",
-  "volvo xc40": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/thirty/2022_Volvo_XC40_Recharge_Pure_Electric_%28facelift%29_Front.jpg/320px-2022_Volvo_XC40_Recharge_Pure_Electric_%28facelift%29_Front.jpg",
-  "volvo v60": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/2019_Volvo_V60_D4_Inscription_Front.jpg/320px-2019_Volvo_V60_D4_Inscription_Front.jpg",
-  // Ford
-  "ford focus": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/2019_Ford_Focus_Titanium_1.0_Front.jpg/320px-2019_Ford_Focus_Titanium_1.0_Front.jpg",
-  "ford kuga": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/2020_Ford_Kuga_Titanium_2.5_Duratec_PHEV_Front.jpg/320px-2020_Ford_Kuga_Titanium_2.5_Duratec_PHEV_Front.jpg",
-  "ford puma": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/2020_Ford_Puma_Titanium_1.0_EcoBoost_mHEV_Front.jpg/320px-2020_Ford_Puma_Titanium_1.0_EcoBoost_mHEV_Front.jpg",
-  "ford galaxy": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Ford_Galaxy_III_%28facelift%2C_2019%29_IMG_3161.jpg/320px-Ford_Galaxy_III_%28facelift%2C_2019%29_IMG_3161.jpg",
-  "ford mondeo": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/2019_Ford_Mondeo_Vignale_2.0_Front.jpg/320px-2019_Ford_Mondeo_Vignale_2.0_Front.jpg",
-  "ford mustang": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/2018_Ford_Mustang_GT_fastback_%28facelift%2C_orange%29%2C_front_8.15.19.jpg/320px-2018_Ford_Mustang_GT_fastback_%28facelift%2C_orange%29%2C_front_8.15.19.jpg",
-  // Nissan
-  "nissan qashqai": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/2022_Nissan_Qashqai_N-Connecta_DIG-T_140_%28J12%29%2C_front_8.22.21.jpg/320px-2022_Nissan_Qashqai_N-Connecta_DIG-T_140_%28J12%29%2C_front_8.22.21.jpg",
-  "nissan juke": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/thirty/2020_Nissan_Juke_N-Connecta_DiG-T_117_Front.jpg/320px-2020_Nissan_Juke_N-Connecta_DiG-T_117_Front.jpg",
-  "nissan leaf": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/2018_Nissan_Leaf_%28ZE1%29%2C_front_8.15.19.jpg/320px-2018_Nissan_Leaf_%28ZE1%29%2C_front_8.15.19.jpg",
-  "nissan x-trail": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/2022_Nissan_X-Trail_Tekna%2B_e-4ORCE_%28T33%29%2C_front_9.18.22.jpg/320px-2022_Nissan_X-Trail_Tekna%2B_e-4ORCE_%28T33%29%2C_front_9.18.22.jpg",
-  // Mazda
-  "mazda cx-5": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2d/2022_Mazda_CX-5_Takumi_%28facelift%29%2C_front_8.22.21.jpg/320px-2022_Mazda_CX-5_Takumi_%28facelift%29%2C_front_8.22.21.jpg",
-  "mazda cx-30": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/2021_Mazda_CX-30_GT_Sport_Tech_%28facelift%29_Front.jpg/320px-2021_Mazda_CX-30_GT_Sport_Tech_%28facelift%29_Front.jpg",
-  "mazda3": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/thirty/2019_Mazda3_sedan_%28BP%2C_red%29%2C_front_8.15.19.jpg/320px-2019_Mazda3_sedan_%28BP%2C_red%29%2C_front_8.15.19.jpg",
-  "mazda mx-5": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/90/2019_Mazda_MX-5_Sport_Nav%2B_2.0_Front.jpg/320px-2019_Mazda_MX-5_Sport_Nav%2B_2.0_Front.jpg",
-  // Fiat / Alfa
-  "fiat 500": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/Fiat_500_%28312%29_IMG_6809.jpg/320px-Fiat_500_%28312%29_IMG_6809.jpg",
-  "fiat panda": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/thirty/Fiat_Panda_III_%28319%2C_facelift_2021%29_IMG_2645.jpg/320px-Fiat_Panda_III_%28319%2C_facelift_2021%29_IMG_2645.jpg",
-  "alfa romeo stelvio": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/2022_Alfa_Romeo_Stelvio_Veloce_%28facelift%29_Front.jpg/320px-2022_Alfa_Romeo_Stelvio_Veloce_%28facelift%29_Front.jpg",
+  "volkswagen sharan": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/VW_Sharan_II_%E2%80%93_Frontansicht%2C_11._M%C3%A4rz_2012.jpg/320px-VW_Sharan_II_%E2%80%93_Frontansicht%2C_11._M%C3%A4rz_2012.jpg",
+  "volkswagen t-roc":  "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/2018_VW_T-Roc_1.5_TSI_ACT_150_PS_Automatik_Havannabraun_Metallic_%28cropped%29.jpg/320px-2018_VW_T-Roc_1.5_TSI_ACT_150_PS_Automatik_Havannabraun_Metallic_%28cropped%29.jpg",
+  "bmw x3":            "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/2022_BMW_X3_xDrive30e_%28G01%2C_facelift%29%2C_front_8.22.21.jpg/320px-2022_BMW_X3_xDrive30e_%28G01%2C_facelift%29%2C_front_8.22.21.jpg",
+  "bmw x5":            "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/2019_BMW_X5_xDrive40i_%28G05%29%2C_front_8.15.19.jpg/320px-2019_BMW_X5_xDrive40i_%28G05%29%2C_front_8.15.19.jpg",
+  "bmw x1":            "https://upload.wikimedia.org/wikipedia/commons/thumb/9/99/2023_BMW_X1_xDrive23i_%28U11%29%2C_front_9.18.22.jpg/320px-2023_BMW_X1_xDrive23i_%28U11%29%2C_front_9.18.22.jpg",
+  "bmw serie 3":       "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/2019_BMW_330i_%28G20%29_Sport_Line%2C_front_8.15.19.jpg/320px-2019_BMW_330i_%28G20%29_Sport_Line%2C_front_8.15.19.jpg",
+  "bmw serie 5":       "https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/2021_BMW_530e_M_Sport_%28G30%2C_facelift%29%2C_front_8.22.21.jpg/320px-2021_BMW_530e_M_Sport_%28G30%2C_facelift%29%2C_front_8.22.21.jpg",
+  "bmw serie 1":       "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/2019_BMW_118i_M_Sport_%28F40%29%2C_front_8.15.19.jpg/320px-2019_BMW_118i_M_Sport_%28F40%29%2C_front_8.15.19.jpg",
+  "bmw serie 2":       "https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/2022_BMW_218i_Gran_Coupe_M_Sport_%28F44%29%2C_front_8.22.21.jpg/320px-2022_BMW_218i_Gran_Coupe_M_Sport_%28F44%29%2C_front_8.22.21.jpg",
+  "renault clio":      "https://upload.wikimedia.org/wikipedia/commons/thumb/9/97/2019_Renault_Clio_Intens_TCe_100_%28facelift%29_Front.jpg/320px-2019_Renault_Clio_Intens_TCe_100_%28facelift%29_Front.jpg",
+  "renault megane":    "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/Renault_Megane_IV_%28facelift%2C_2020%29_IMG_3441.jpg/320px-Renault_Megane_IV_%28facelift%2C_2020%29_IMG_3441.jpg",
+  "renault captur":    "https://upload.wikimedia.org/wikipedia/commons/thumb/1/19/2020_Renault_Captur_Iconic_TCe_130_%28facelift%29_Front.jpg/320px-2020_Renault_Captur_Iconic_TCe_130_%28facelift%29_Front.jpg",
+  "renault scenic":    "https://upload.wikimedia.org/wikipedia/commons/thumb/9/94/Renault_Scenic_IV_%282016-2019%29.jpg/320px-Renault_Scenic_IV_%282016-2019%29.jpg",
+  "renault grand scenic":"https://upload.wikimedia.org/wikipedia/commons/thumb/9/94/Renault_Scenic_IV_%282016-2019%29.jpg/320px-Renault_Scenic_IV_%282016-2019%29.jpg",
+  "renault kadjar":    "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/2019_Renault_Kadjar_Iconic_dCi_115_Front.jpg/320px-2019_Renault_Kadjar_Iconic_dCi_115_Front.jpg",
+  "renault zoe":       "https://upload.wikimedia.org/wikipedia/commons/thumb/5/57/2020_Renault_Zoe_GT_Line_Front.jpg/320px-2020_Renault_Zoe_GT_Line_Front.jpg",
+  "peugeot 208":       "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/2020_Peugeot_208_Allure_PureTech_100_Front.jpg/320px-2020_Peugeot_208_Allure_PureTech_100_Front.jpg",
+  "peugeot 308":       "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/2022_Peugeot_308_Allure_PureTech_130_Front.jpg/320px-2022_Peugeot_308_Allure_PureTech_130_Front.jpg",
+  "peugeot 3008":      "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Peugeot_3008_II_%28facelift%2C_2020%29_IMG_2927.jpg/320px-Peugeot_3008_II_%28facelift%2C_2020%29_IMG_2927.jpg",
+  "peugeot 5008":      "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Peugeot_5008_II_%28facelift%2C_2020%29_IMG_3571.jpg/320px-Peugeot_5008_II_%28facelift%2C_2020%29_IMG_3571.jpg",
+  "peugeot 2008":      "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/2020_Peugeot_2008_Allure_PureTech_130_Front.jpg/320px-2020_Peugeot_2008_Allure_PureTech_130_Front.jpg",
+  "kia sportage":      "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/2022_Kia_Sportage_GT-Line_%28NQ5%29%2C_front_8.22.21.jpg/320px-2022_Kia_Sportage_GT-Line_%28NQ5%29%2C_front_8.22.21.jpg",
+  "kia sorento":       "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b3/2021_Kia_Sorento_GT-Line_%28MQ4%29%2C_front_8.22.21.jpg/320px-2021_Kia_Sorento_GT-Line_%28MQ4%29%2C_front_8.22.21.jpg",
+  "kia carnival":      "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/2022_Kia_Carnival_EX_%28KA4%29%2C_front_8.22.21.jpg/320px-2022_Kia_Carnival_EX_%28KA4%29%2C_front_8.22.21.jpg",
+  "kia niro":          "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/2023_Kia_Niro_HEV_GT-Line_%28SG2%29%2C_front_9.18.22.jpg/320px-2023_Kia_Niro_HEV_GT-Line_%28SG2%29%2C_front_9.18.22.jpg",
+  "kia ceed":          "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Kia_Ceed_III_IMG_6618.jpg/320px-Kia_Ceed_III_IMG_6618.jpg",
+  "kia ev6":           "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/2022_Kia_EV6_GT-Line_%28CV%29%2C_front_8.22.21.jpg/320px-2022_Kia_EV6_GT-Line_%28CV%29%2C_front_8.22.21.jpg",
+  "hyundai tucson":    "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/2021_Hyundai_Tucson_Premium_MHEV_1.6_Front.jpg/320px-2021_Hyundai_Tucson_Premium_MHEV_1.6_Front.jpg",
+  "hyundai santa fe":  "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8b/2021_Hyundai_Santa_Fe_Premium_SE_CRDi_%28facelift%29_Front.jpg/320px-2021_Hyundai_Santa_Fe_Premium_SE_CRDi_%28facelift%29_Front.jpg",
+  "hyundai kona":      "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9d/2021_Hyundai_Kona_Premium_1.0T_Front.jpg/320px-2021_Hyundai_Kona_Premium_1.0T_Front.jpg",
+  "hyundai ioniq 5":   "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1d/2022_Hyundai_IONIQ_5_%28NE%29%2C_front_8.22.21.jpg/320px-2022_Hyundai_IONIQ_5_%28NE%29%2C_front_8.22.21.jpg",
+  "hyundai i30":       "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Hyundai_i30_III_%28facelift%2C_2020%29_IMG_1476.jpg/320px-Hyundai_i30_III_%28facelift%2C_2020%29_IMG_1476.jpg",
+  "seat leon":         "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d2/2020_Seat_Leon_FR_1.5_Front.jpg/320px-2020_Seat_Leon_FR_1.5_Front.jpg",
+  "seat ibiza":        "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/2021_Seat_Ibiza_FR_1.0_TSI_Front.jpg/320px-2021_Seat_Ibiza_FR_1.0_TSI_Front.jpg",
+  "seat ateca":        "https://upload.wikimedia.org/wikipedia/commons/thumb/0/06/2021_Seat_Ateca_FR_2.0_TDI_Front.jpg/320px-2021_Seat_Ateca_FR_2.0_TDI_Front.jpg",
+  "seat tarraco":      "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/2019_Seat_Tarraco_FR_2.0_TDI_Front.jpg/320px-2019_Seat_Tarraco_FR_2.0_TDI_Front.jpg",
+  "seat alhambra":     "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/SEAT_Alhambra_II_%28facelift%2C_2015%29_IMG_0612.jpg/320px-SEAT_Alhambra_II_%28facelift%2C_2015%29_IMG_0612.jpg",
+  "skoda octavia":     "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f1/2021_%C5%A0koda_Octavia_Style_TDI_Front.jpg/320px-2021_%C5%A0koda_Octavia_Style_TDI_Front.jpg",
+  "skoda kodiaq":      "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/2022_%C5%A0koda_Kodiaq_Style_TDI_Front.jpg/320px-2022_%C5%A0koda_Kodiaq_Style_TDI_Front.jpg",
+  "skoda superb":      "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c4/2020_%C5%A0koda_Superb_SE_L_%28facelift%29_Front.jpg/320px-2020_%C5%A0koda_Superb_SE_L_%28facelift%29_Front.jpg",
+  "cupra formentor":   "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/2021_Cupra_Formentor_VZ2_2.0_Front.jpg/320px-2021_Cupra_Formentor_VZ2_2.0_Front.jpg",
+  "dacia duster":      "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/2022_Dacia_Duster_Extreme_TCe_150_Front.jpg/320px-2022_Dacia_Duster_Extreme_TCe_150_Front.jpg",
+  "dacia sandero":     "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a6/2021_Dacia_Sandero_Stepway_Comfort_TCe_90_Front.jpg/320px-2021_Dacia_Sandero_Stepway_Comfort_TCe_90_Front.jpg",
+  "dacia lodgy":       "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Dacia_Lodgy_01.jpg/320px-Dacia_Lodgy_01.jpg",
+  "dacia jogger":      "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8b/2022_Dacia_Jogger_Extreme_TCe_110_Front.jpg/320px-2022_Dacia_Jogger_Extreme_TCe_110_Front.jpg",
+  "volvo xc90":        "https://upload.wikimedia.org/wikipedia/commons/thumb/2/24/2020_Volvo_XC90_Recharge_T8_Inscription_%28facelift%29_Front.jpg/320px-2020_Volvo_XC90_Recharge_T8_Inscription_%28facelift%29_Front.jpg",
+  "volvo xc60":        "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/2022_Volvo_XC60_B5_Inscription_%28facelift%29_Front.jpg/320px-2022_Volvo_XC60_B5_Inscription_%28facelift%29_Front.jpg",
+  "volvo xc40":        "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/2020_Volvo_XC40_T5_R-Design_AWD_Front.jpg/320px-2020_Volvo_XC40_T5_R-Design_AWD_Front.jpg",
+  "volvo v60":         "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/2019_Volvo_V60_D4_Inscription_Front.jpg/320px-2019_Volvo_V60_D4_Inscription_Front.jpg",
+  "ford focus":        "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/2019_Ford_Focus_Titanium_1.0_Front.jpg/320px-2019_Ford_Focus_Titanium_1.0_Front.jpg",
+  "ford kuga":         "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/2020_Ford_Kuga_Titanium_2.5_Duratec_PHEV_Front.jpg/320px-2020_Ford_Kuga_Titanium_2.5_Duratec_PHEV_Front.jpg",
+  "ford puma":         "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/2020_Ford_Puma_Titanium_1.0_EcoBoost_mHEV_Front.jpg/320px-2020_Ford_Puma_Titanium_1.0_EcoBoost_mHEV_Front.jpg",
+  "ford galaxy":       "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Ford_Galaxy_III_%28facelift%2C_2019%29_IMG_3161.jpg/320px-Ford_Galaxy_III_%28facelift%2C_2019%29_IMG_3161.jpg",
+  "ford mondeo":       "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/2019_Ford_Mondeo_Vignale_2.0_Front.jpg/320px-2019_Ford_Mondeo_Vignale_2.0_Front.jpg",
+  "ford mustang":      "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/2018_Ford_Mustang_GT_fastback_%28facelift%2C_orange%29%2C_front_8.15.19.jpg/320px-2018_Ford_Mustang_GT_fastback_%28facelift%2C_orange%29%2C_front_8.15.19.jpg",
+  "ford fiesta":       "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/2017_Ford_Fiesta_ST-Line_1.0_Front.jpg/320px-2017_Ford_Fiesta_ST-Line_1.0_Front.jpg",
+  "nissan qashqai":    "https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/2022_Nissan_Qashqai_N-Connecta_DIG-T_140_%28J12%29%2C_front_8.22.21.jpg/320px-2022_Nissan_Qashqai_N-Connecta_DIG-T_140_%28J12%29%2C_front_8.22.21.jpg",
+  "nissan juke":       "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b8/2020_Nissan_Juke_N-Connecta_DiG-T_117_Front.jpg/320px-2020_Nissan_Juke_N-Connecta_DiG-T_117_Front.jpg",
+  "nissan leaf":       "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/2018_Nissan_Leaf_%28ZE1%29%2C_front_8.15.19.jpg/320px-2018_Nissan_Leaf_%28ZE1%29%2C_front_8.15.19.jpg",
+  "nissan x-trail":    "https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/2022_Nissan_X-Trail_Tekna%2B_e-4ORCE_%28T33%29%2C_front_9.18.22.jpg/320px-2022_Nissan_X-Trail_Tekna%2B_e-4ORCE_%28T33%29%2C_front_9.18.22.jpg",
+  "mazda cx-5":        "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2d/2022_Mazda_CX-5_Takumi_%28facelift%29%2C_front_8.22.21.jpg/320px-2022_Mazda_CX-5_Takumi_%28facelift%29%2C_front_8.22.21.jpg",
+  "mazda cx-30":       "https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/2021_Mazda_CX-30_GT_Sport_Tech_%28facelift%29_Front.jpg/320px-2021_Mazda_CX-30_GT_Sport_Tech_%28facelift%29_Front.jpg",
+  "mazda3":            "https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/2019_Mazda3_fastback_%28BP%2C_red%29%2C_front_8.15.19.jpg/320px-2019_Mazda3_fastback_%28BP%2C_red%29%2C_front_8.15.19.jpg",
+  "mazda mx-5":        "https://upload.wikimedia.org/wikipedia/commons/thumb/9/90/2019_Mazda_MX-5_Sport_Nav%2B_2.0_Front.jpg/320px-2019_Mazda_MX-5_Sport_Nav%2B_2.0_Front.jpg",
+  "honda cr-v":        "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/2023_Honda_CR-V_e%3APHEV_Advance_%28FL%29%2C_front_9.18.22.jpg/320px-2023_Honda_CR-V_e%3APHEV_Advance_%28FL%29%2C_front_9.18.22.jpg",
+  "honda civic":       "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/2022_Honda_Civic_e%3AHEV_Elegance_%28FL%29%2C_front_9.18.22.jpg/320px-2022_Honda_Civic_e%3AHEV_Elegance_%28FL%29%2C_front_9.18.22.jpg",
+  "honda jazz":        "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/2020_Honda_Jazz_EX_1.5_i-MMD_%28GR%29%2C_front_8.22.21.jpg/320px-2020_Honda_Jazz_EX_1.5_i-MMD_%28GR%29%2C_front_8.22.21.jpg",
+  "tesla model 3":     "https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/2019_Tesla_Model_3_Performance_AWD_%28facelift%2C_red%29%2C_front_8.15.19.jpg/320px-2019_Tesla_Model_3_Performance_AWD_%28facelift%2C_red%29%2C_front_8.15.19.jpg",
+  "tesla model y":     "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/2022_Tesla_Model_Y_Long_Range_AWD_%28facelift%29%2C_front_8.22.21.jpg/320px-2022_Tesla_Model_Y_Long_Range_AWD_%28facelift%29%2C_front_8.22.21.jpg",
+  "tesla model s":     "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e2/2022_Tesla_Model_S_Plaid_%28facelift%29%2C_front_8.22.21.jpg/320px-2022_Tesla_Model_S_Plaid_%28facelift%29%2C_front_8.22.21.jpg",
+  "fiat 500":          "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/Fiat_500_%28312%29_IMG_6809.jpg/320px-Fiat_500_%28312%29_IMG_6809.jpg",
+  "fiat panda":        "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Fiat_Panda_III_facelift.jpg/320px-Fiat_Panda_III_facelift.jpg",
+  "alfa romeo stelvio":"https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/2022_Alfa_Romeo_Stelvio_Veloce_%28facelift%29_Front.jpg/320px-2022_Alfa_Romeo_Stelvio_Veloce_%28facelift%29_Front.jpg",
   "alfa romeo giulia": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/2022_Alfa_Romeo_Giulia_Veloce_%28facelift%29_Front.jpg/320px-2022_Alfa_Romeo_Giulia_Veloce_%28facelift%29_Front.jpg",
-  // Tesla
-  "tesla model 3": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/2019_Tesla_Model_3_Performance_AWD_%28facelift%2C_red%29%2C_front_8.15.19.jpg/320px-2019_Tesla_Model_3_Performance_AWD_%28facelift%2C_red%29%2C_front_8.15.19.jpg",
-  "tesla model y": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/2022_Tesla_Model_Y_Long_Range_AWD_%28facelift%29%2C_front_8.22.21.jpg/320px-2022_Tesla_Model_Y_Long_Range_AWD_%28facelift%29%2C_front_8.22.21.jpg",
-  // Honda
-  "honda cr-v": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/2023_Honda_CR-V_e%3APHEV_Advance_%28facelift%29_Front.jpg/320px-2023_Honda_CR-V_e%3APHEV_Advance_%28facelift%29_Front.jpg",
-  "honda civic": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/2022_Honda_Civic_e%3AHEV_Elegance_%28FL%29%2C_front_9.18.22.jpg/320px-2022_Honda_Civic_e%3AHEV_Elegance_%28FL%29%2C_front_9.18.22.jpg",
-  "honda jazz": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/2020_Honda_Jazz_EX_1.5_i-MMD_%28GR%29%2C_front_8.22.21.jpg/320px-2020_Honda_Jazz_EX_1.5_i-MMD_%28GR%29%2C_front_8.22.21.jpg",
-  // Mitsubishi
-  "mitsubishi outlander": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/2022_Mitsubishi_Outlander_Exceed_%28facelift%29_Front.jpg/320px-2022_Mitsubishi_Outlander_Exceed_%28facelift%29_Front.jpg",
-  "mitsubishi asx": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/2023_Mitsubishi_ASX_Instyle_%28facelift%29_Front.jpg/320px-2023_Mitsubishi_ASX_Instyle_%28facelift%29_Front.jpg",
-  // Jeep / Land Rover
-  "jeep renegade": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d8/2019_Jeep_Renegade_Limited_1.3_Front.jpg/320px-2019_Jeep_Renegade_Limited_1.3_Front.jpg",
-  "jeep compass": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/2022_Jeep_Compass_Limited_%28facelift%29_Front.jpg/320px-2022_Jeep_Compass_Limited_%28facelift%29_Front.jpg",
-  "land rover discovery": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b1/2022_Land_Rover_Discovery_D300_SE_%28facelift%29_Front.jpg/320px-2022_Land_Rover_Discovery_D300_SE_%28facelift%29_Front.jpg",
-  "land rover defender": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/2020_Land_Rover_Defender_110_D240_SE_%28L663%29%2C_front_8.22.21.jpg/320px-2020_Land_Rover_Defender_110_D240_SE_%28L663%29%2C_front_8.22.21.jpg",
-  // Citroën / Opel
-  "citroen c3": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d2/2022_Citro%C3%ABn_C3_Shine_PureTech_83_%28facelift%29_Front.jpg/320px-2022_Citro%C3%ABn_C3_Shine_PureTech_83_%28facelift%29_Front.jpg",
-  "citroen c5 aircross": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/2022_Citro%C3%ABn_C5_Aircross_Shine_Pack_PHEV_%28facelift%29_Front.jpg/320px-2022_Citro%C3%ABn_C5_Aircross_Shine_Pack_PHEV_%28facelift%29_Front.jpg",
-  "opel astra": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2d/2022_Opel_Astra_L_GS_Line_1.2_Front.jpg/320px-2022_Opel_Astra_L_GS_Line_1.2_Front.jpg",
-  "opel mokka": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/thirty/2021_Opel_Mokka_GS_Line_1.2_Front.jpg/320px-2021_Opel_Mokka_GS_Line_1.2_Front.jpg",
-  "opel grandland": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/2022_Opel_Grandland_%28facelift%29_Front.jpg/320px-2022_Opel_Grandland_%28facelift%29_Front.jpg",
+  "opel astra":        "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2d/2022_Opel_Astra_L_GS_Line_1.2_Front.jpg/320px-2022_Opel_Astra_L_GS_Line_1.2_Front.jpg",
+  "opel mokka":        "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/2021_Opel_Mokka_GS_Line_1.2_Front.jpg/320px-2021_Opel_Mokka_GS_Line_1.2_Front.jpg",
+  "opel grandland":    "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/2022_Opel_Grandland_%28facelift%29_Front.jpg/320px-2022_Opel_Grandland_%28facelift%29_Front.jpg",
+  "opel corsa":        "https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/2020_Opel_Corsa_F_GS_Line_1.2_Front.jpg/320px-2020_Opel_Corsa_F_GS_Line_1.2_Front.jpg",
+  "jeep renegade":     "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d8/2019_Jeep_Renegade_Limited_1.3_Front.jpg/320px-2019_Jeep_Renegade_Limited_1.3_Front.jpg",
+  "jeep compass":      "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/2022_Jeep_Compass_Limited_%28facelift%29_Front.jpg/320px-2022_Jeep_Compass_Limited_%28facelift%29_Front.jpg",
+  "land rover discovery":"https://upload.wikimedia.org/wikipedia/commons/thumb/b/b1/2022_Land_Rover_Discovery_D300_SE_%28facelift%29_Front.jpg/320px-2022_Land_Rover_Discovery_D300_SE_%28facelift%29_Front.jpg",
+  "land rover defender":"https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/2020_Land_Rover_Defender_110_D240_SE_%28L663%29%2C_front_8.22.21.jpg/320px-2020_Land_Rover_Defender_110_D240_SE_%28L663%29%2C_front_8.22.21.jpg",
+  "mitsubishi outlander":"https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/2022_Mitsubishi_Outlander_Exceed_%28facelift%29_Front.jpg/320px-2022_Mitsubishi_Outlander_Exceed_%28facelift%29_Front.jpg",
+  "mitsubishi asx":    "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/2023_Mitsubishi_ASX_Instyle_%28facelift%29_Front.jpg/320px-2023_Mitsubishi_ASX_Instyle_%28facelift%29_Front.jpg",
+  "mercedes-benz classe c":"https://upload.wikimedia.org/wikipedia/commons/thumb/d/d1/2022_Mercedes-Benz_C300_%28W206%29_AMG_Line%2C_front_8.22.21.jpg/320px-2022_Mercedes-Benz_C300_%28W206%29_AMG_Line%2C_front_8.22.21.jpg",
+  "mercedes-benz glc": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/72/2023_Mercedes-Benz_GLC_300_%28X254%29%2C_front_9.18.22.jpg/320px-2023_Mercedes-Benz_GLC_300_%28X254%29%2C_front_9.18.22.jpg",
+  "mercedes-benz classe a":"https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/2019_Mercedes-Benz_A200_AMG_Line_%28W177%29%2C_front_8.15.19.jpg/320px-2019_Mercedes-Benz_A200_AMG_Line_%28W177%29%2C_front_8.15.19.jpg",
+  "mercedes-benz gla": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/33/2021_Mercedes-Benz_GLA_250_%28H247%29%2C_front_8.22.21.jpg/320px-2021_Mercedes-Benz_GLA_250_%28H247%29%2C_front_8.22.21.jpg",
+  "mercedes-benz gle": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/2020_Mercedes-Benz_GLE_300d_AMG_Line_%28W167%29%2C_front_8.22.21.jpg/320px-2020_Mercedes-Benz_GLE_300d_AMG_Line_%28W167%29%2C_front_8.22.21.jpg",
+  "citroen c3":        "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d2/2022_Citro%C3%ABn_C3_Shine_PureTech_83_%28facelift%29_Front.jpg/320px-2022_Citro%C3%ABn_C3_Shine_PureTech_83_%28facelift%29_Front.jpg",
+  "citroen c5 aircross":"https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/2022_Citro%C3%ABn_C5_Aircross_Shine_Pack_PHEV_%28facelift%29_Front.jpg/320px-2022_Citro%C3%ABn_C5_Aircross_Shine_Pack_PHEV_%28facelift%29_Front.jpg",
+  "audi a3":           "https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/2021_Audi_A3_Sportback_35_TFSI_S_Line_%28facelift%29_Front.jpg/320px-2021_Audi_A3_Sportback_35_TFSI_S_Line_%28facelift%29_Front.jpg",
+  "audi a4":           "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/2019_Audi_A4_S_Line_TDI_S-A_Front.jpg/320px-2019_Audi_A4_S_Line_TDI_S-A_Front.jpg",
+  "audi q3":           "https://upload.wikimedia.org/wikipedia/commons/thumb/1/16/2019_Audi_Q3_S_Line_35_TFSI_S-A_Front.jpg/320px-2019_Audi_Q3_S_Line_35_TFSI_S-A_Front.jpg",
+  "audi q5":           "https://upload.wikimedia.org/wikipedia/commons/thumb/3/35/2021_Audi_Q5_S_Line_40_TDI_Quattro_S-A_%28facelift%29_Front.jpg/320px-2021_Audi_Q5_S_Line_40_TDI_Quattro_S-A_%28facelift%29_Front.jpg",
+  "audi q7":           "https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/2020_Audi_Q7_S_Line_50_TDI_Quattro_%28facelift%29_Front.jpg/320px-2020_Audi_Q7_S_Line_50_TDI_Quattro_%28facelift%29_Front.jpg",
 };
+
 
 function getCarImageUrl(name) {
   const key = name.toLowerCase()
@@ -1024,13 +1095,14 @@ function renderResults(filters, suggestions, tip) {
     <span style="font-weight:600">Dica: </span>${tip}</div>` : "";
 
   document.getElementById("empty").style.display = "none";
-  document.querySelector(".main").classList.add("has-results");
+  
   const res = document.getElementById("res");
   res.style.display = "block";
-  // On mobile, switch to results tab automatically after first results
+  // On mobile: slide to results automatically
   if (isMobile()) {
-    showMobileTabs();
-    setTimeout(() => switchTab('results'), 300);
+    setTimeout(() => {
+      mobGoResults();
+    }, 400);
   }
   res.innerHTML = `
     <div class="sv-hero">
@@ -1075,32 +1147,29 @@ async function process(txt) {
   }
 }
 
-// ── MOBILE TABS ──
+// ── MOBILE SLIDE NAV ──
 function isMobile() { return window.innerWidth <= 700; }
 
-function switchTab(tab) {
-  const sb = document.querySelector('.sb');
-  const main = document.querySelector('.main');
-  const tabChat = document.getElementById('tabChat');
-  const tabResults = document.getElementById('tabResults');
-  if (tab === 'chat') {
-    sb.classList.remove('hide-mobile');
-    tabChat.classList.add('active');
-    tabResults.classList.remove('active');
-  } else {
-    sb.classList.add('hide-mobile');
-    tabResults.classList.add('active');
-    tabChat.classList.remove('active');
-    // Scroll results to top
-    main.scrollTop = 0;
+function mobGoResults() {
+  document.getElementById('mobSlider').classList.add('show-results');
+  document.getElementById('mob-see-results').classList.remove('visible');
+}
+
+function mobGoChat() {
+  document.getElementById('mobSlider').classList.remove('show-results');
+  // Show the button again so user can go back to results
+  if (document.getElementById('res').innerHTML.trim()) {
+    document.getElementById('mob-see-results').classList.add('visible');
   }
 }
 
-function showMobileTabs() {
+function showMobileCTA() {
   if (isMobile()) {
-    document.getElementById('mobTabs').style.display = 'flex';
+    document.getElementById('mob-see-results').classList.add('visible');
   }
 }
+
+function showMobileTabs() {} // kept for compat
 
 function boot() {
   const v = document.getElementById("LI").value.trim();
@@ -1122,8 +1191,8 @@ async function send() {
   const t = el.value.trim();
   if (!t) return;
   el.value = ""; el.style.height = "auto";
-  // On mobile switch to chat to show the reply coming in
-  if (isMobile()) switchTab('chat');
+  // On mobile: slide back to chat to show reply
+  if (isMobile()) mobGoChat();
   addMsg("u", t);
   showTyping();
   await process(t);
@@ -1135,10 +1204,12 @@ function doReset() {
   document.getElementById("res").style.display = "none";
   document.getElementById("res").innerHTML = "";
   document.getElementById("empty").style.display = "flex";
-  document.querySelector(".main").classList.remove("has-results");
+  
   document.getElementById("sbFilters").classList.remove("has");
-  document.getElementById("mobTabs").style.display = "none";
-  if (isMobile()) { document.querySelector('.sb').classList.remove('hide-mobile'); }
+  if (isMobile()) {
+    document.getElementById('mobSlider').classList.remove('show-results');
+    document.getElementById('mob-see-results').classList.remove('visible');
+  }
   document.getElementById("app").classList.remove("on");
   document.getElementById("land").style.display = "flex";
   document.getElementById("LI").value = "";
